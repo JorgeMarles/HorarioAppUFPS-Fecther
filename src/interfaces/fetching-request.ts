@@ -16,7 +16,7 @@ type SubjectRequest = {
   isPrincipal: boolean;
 };
 
-type ScrappingRequest = PensumRequest | SubjectRequest;
+type FetchingRequest = PensumRequest | SubjectRequest;
 
 const PensumRequestSchema = z.object({
   jobId: z.number(),
@@ -33,7 +33,7 @@ const SubjectRequestSchema = z.object({
   isPrincipal: z.boolean(),
 });
 
-const ScrappingRequestSchema = z.discriminatedUnion("type", [
+const FetchingRequestSchema = z.discriminatedUnion("type", [
   PensumRequestSchema,
   SubjectRequestSchema,
 ]);
@@ -41,8 +41,8 @@ const ScrappingRequestSchema = z.discriminatedUnion("type", [
 export {
   PensumRequest,
   PensumRequestSchema,
-  ScrappingRequest,
-  ScrappingRequestSchema,
+  FetchingRequest,
+  FetchingRequestSchema,
   SubjectRequest,
   SubjectRequestSchema,
 };
