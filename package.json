@@ -1,12 +1,12 @@
 {
-  "name": "express-api-starter-ts",
+  "name": "horarioappufps-fetcher",
   "version": "2.0.0",
-  "description": "A basic starter for an express.js v5 API with Typescript",
-  "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
+  "description": "Web fetcher for Divisist UFPS Platform",
+  "author": "Jorge Marles (jamarlesf@gmail.com)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/w3cj/express-api-starter-ts.git"
+    "url": "https://github.com/JorgeMarles/HorarioAppUFPS-Fetcher.git"
   },
   "keywords": [],
   "main": "src/index.ts",
