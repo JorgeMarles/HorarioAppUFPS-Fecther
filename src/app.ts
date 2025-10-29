@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 
 import { RegisterRoutes } from "./generated/routes.js";
 import * as middlewares from "./middlewares.js";
+import { httpLogger } from "./logger.js";
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use(express.static("public"));
+
+app.use(httpLogger);
 
 RegisterRoutes(app);
 

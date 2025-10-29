@@ -3,6 +3,9 @@ import type { NextFunction, Request, Response } from "express";
 import type ErrorResponse from "./interfaces/error-response.js";
 
 import { env } from "./env.js";
+import { logger } from "./logger.js";
+import { ZodError } from "zod";
+import { ValidateError } from "tsoa";
 
 export function notFound(req: Request, res: Response, next: NextFunction) {
   res.status(404);
@@ -10,11 +13,64 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
   next(error);
 }
 
-export function errorHandler(err: Error, req: Request, res: Response<ErrorResponse>, _next: NextFunction) {
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
-  res.status(statusCode);
-  res.json({
-    message: err.message,
-    stack: env.NODE_ENV === "production" ? "🥞" : err.stack,
+// src/middlewares.ts
+// ...existing code...
+export function errorHandler(
+  err: unknown, 
+  req: Request, 
+  res: Response<ErrorResponse>, 
+  _next: NextFunction
+): void {
+  // Log del error
+  logger.error({ 
+    err, 
+    url: req.url, 
+    method: req.method, 
+    body: req.body 
+  }, "Unhandled error");
+
+  // Zod validation errors
+  if (err instanceof ZodError) {
+    res.status(400).json({
+      message: "Validation failed",
+      details: err.errors,
+      stack: env.NODE_ENV === "production" ? undefined : err.stack,
+    });
+    return;
+  }
+
+  // tsoa validation errors
+  if (err instanceof ValidateError) {
+    res.status(422).json({
+      message: "Validation failed",
+      details: err.fields,
+      stack: env.NODE_ENV === "production" ? "🥞" : err.stack,
+    });
+    return;
+  }
+
+  // Errores personalizados con statusCode
+  if (err instanceof Error && 'statusCode' in err) {
+    res.status((err as any).statusCode).json({
+      message: err.message,
+      stack: env.NODE_ENV === "production" ? "🥞" : err.stack,
+    });
+    return;
+  }
+
+  // Error genérico
+  if (err instanceof Error) {
+    res.status(500).json({
+      message: err.message,
+      stack: env.NODE_ENV === "production" ? "🥞" : err.stack,
+    });
+    return;
+  }
+
+  // Fallback
+  res.status(500).json({
+    message: "Internal server error",
+    stack: env.NODE_ENV === "production" ? "🥞" : undefined,
   });
 }
+// ...existing code...
