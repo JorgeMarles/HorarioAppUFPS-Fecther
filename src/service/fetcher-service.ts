@@ -30,12 +30,6 @@ class FetcherService {
 
     return subject;
   }
-
-  async getPensumName(cookie: string): Promise<string> {
-    const name: string = await this.fetcher.getPensumName(cookie);
-
-    return name;
-  }
 }
 
 export default FetcherService;

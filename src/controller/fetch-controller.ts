@@ -10,25 +10,19 @@ import { logger } from "../logger.js";
 class FetcherController extends Controller {
   @Post("")
   @SuccessResponse("200", "Fetch process was successful")
-  public async postFect(@Body() body: FetchingRequest): Promise<{ message: FetchingRequest }> {
+  public async postFect(@Body() body: FetchingRequest): Promise<any> {
     const fetcher = new FetcherService();
     const validatedBody = FetchingRequestSchema.parse(body);
-    if (validatedBody.type === "PENSUM")
-      fetcher.getPensum(validatedBody);
-    return {
-      message: validatedBody,
-    };
-  }
-
-  @Get("")
-  @SuccessResponse("200", "Fetch process was successful")
-  public async test(@Query("ci_session") cookie: string): Promise<any> {
-    logger.info({ cookie }, "Cookie");
-    const fetcher = new FetcherService();
-
-    const name: string = await fetcher.getPensumName(cookie);
-
-    return { name };
+    if (validatedBody.type === "PENSUM") {
+      const pensum = await fetcher.getPensum(validatedBody);
+      return {
+        ...pensum
+      }
+    } else {
+      return {
+        message: validatedBody,
+      }
+    }
   }
 }
 

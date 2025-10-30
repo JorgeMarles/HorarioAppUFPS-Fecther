@@ -1,14 +1,13 @@
 import { JSDOM } from "jsdom";
 
 import type { PensumData } from "../interfaces/pensum-schema.js";
-import type { SubjectData } from "../interfaces/subject-schema.js";
+import type { SubjectData, SubjectPensumData } from "../interfaces/subject-schema.js";
 import type DivisistFetcher from "./divisist-fetcher.js";
 import { Agent } from "undici";
 
 import fs from 'fs'
 
 import { env } from "../env.js";
-import { logger } from "../logger.js";
 
 type HttpMethod = "GET" | "POST";
 
@@ -28,7 +27,7 @@ class DivisistFetcherImpl implements DivisistFetcher {
         const ca = fs.readFileSync(env.NODE_EXTRA_CA_CERTS, "utf8");
         dispatcher = new Agent({
           connect: {
-            ca: fs.readFileSync(env.NODE_EXTRA_CA_CERTS, 'utf8'),
+            ca,
             rejectUnauthorized: true,
           },
         });
@@ -89,11 +88,79 @@ class DivisistFetcherImpl implements DivisistFetcher {
   }
 
   async getPensumInfo(ci_session: string): Promise<PensumData> {
-    const ENDPOINT_NAME = "";
-    const QUERY_SELECTOR = "";
+    const ENDPOINT_NAME = "informacion_academica/pensum";
     const html: string = await this.makeRequest(ENDPOINT_NAME, ci_session, "GET");
     const document: Document = this.getJSDOM(html);
-    throw new Error("Method not implemented.");
+
+    const pensumData: PensumData = {};
+    const semestersElementQuery = "#content_completw > div.wrapper > div > section.content > div > div.box-body.no-padding > div > table > tbody";
+    const semestersElement = this.getElement(document, semestersElementQuery)
+
+    const semesters: HTMLCollection = semestersElement.children;
+
+    pensumData.semesters = semesters.length;
+    pensumData.updateTeachers = true;
+    pensumData.subjects = {};
+
+    let currentSemester = 1;
+    for (const semester of semesters) {
+      const subjects: HTMLCollection = semester.children;
+      let currentSubject = 0;
+      for (const subject of subjects) {
+        currentSubject++;
+        if (currentSubject == 1) continue;
+
+        const subjectData = this.getSubjectFromPensumElement(subject, currentSemester);
+        pensumData.subjects[subjectData.code] = subjectData;
+      }
+    }
+
+    return pensumData;
+  }
+
+  private getSubjectFromPensumElement(subjectElement: Element, semester: number): SubjectPensumData {
+    const title: string = (subjectElement.children[0] as HTMLElement).title;
+    const content: string = subjectElement.children[0].innerHTML;
+
+    //Title processing (name and requirements)
+    const titleInfo: string[] = title.split("-").map(e => e.trim());
+    const name: string = titleInfo[0];
+    const reqs: string[] = titleInfo.slice(1).join(" ").split(" ").slice(1).map(e => e.trim()).filter(el => el !== "" && el !== "Cre:0");
+
+
+    const requisites: string[] = [];
+    let requiredCredits: number = 0;
+    reqs.forEach(e => {
+      if(e.includes("Cre:")){
+        requiredCredits = parseInt(e.split(":")[1])
+      }else{
+        requisites.push(e);
+      }
+    })
+
+    
+    //Content processing (code, hours, credits, elective)
+    const cleanContent = content.split(/\s/).filter(el => el !== "").join(" ");
+    let type: "MANDATORY" | "ELECTIVE" = "MANDATORY";
+    if (cleanContent.includes("Electiva")) {
+      type = "ELECTIVE";
+    }
+    const code = /\d{7}/.exec(cleanContent)![0];
+    const hours = parseInt(/horas:\d+/.exec(cleanContent)![0].split(":")[1])
+    const credits = parseInt(/Cred:\d+/.exec(cleanContent)![0].split(":")[1])
+
+    const data: SubjectPensumData = {
+      code,
+      credits,
+      hours,
+      name,
+      requiredCredits,
+      requisites,
+      semester,
+      type
+    }
+
+    return data;
   }
 
   async getSubjectInfo(ci_session: string): Promise<SubjectData> {
