@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  PORT: z.coerce.number().default(3000),
+  PORT: z.coerce.number().default(8080),
   DIVISIST_URL: z.string().url("Given DIVISIST_URL isn't a valid URL"),
   DELAY_MS: z.coerce.number().int("Delat should be an integer representing the miliseconds").default(5000),
   LOG_LEVEL: z.enum(["fatal","error","warn","info","debug","trace"]).default("info"),

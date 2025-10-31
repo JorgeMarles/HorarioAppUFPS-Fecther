@@ -2,6 +2,7 @@ import "reflect-metadata";
 
 import app from "./app.js";
 import { env } from "./env.js";
+import { logger } from "./logger.js";
 
 const port = env.PORT;
 const server = app.listen(port, () => {
@@ -18,4 +19,12 @@ server.on("error", (err) => {
     console.error("Failed to start server:", err);
   }
   process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    process.exit(0);
+  });
 });

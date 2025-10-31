@@ -36,7 +36,8 @@
     "reflect-metadata": "^0.2.2",
     "swagger-ui-express": "^5.0.1",
     "undici": "^7.16.0",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "tsoa": "^6.6.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.2",
@@ -51,7 +52,6 @@
     "rimraf": "^6.0.1",
     "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
-    "tsoa": "^6.6.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
