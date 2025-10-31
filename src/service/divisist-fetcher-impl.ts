@@ -1,13 +1,16 @@
 import { JSDOM } from "jsdom";
 
 import type { PensumData } from "../interfaces/pensum-schema.js";
-import type { SubjectData, SubjectPensumData } from "../interfaces/subject-schema.js";
+import type { GroupData, SessionData, SubjectData, SubjectPensumData } from "../interfaces/subject-schema.js";
 import type DivisistFetcher from "./divisist-fetcher.js";
 import { Agent } from "undici";
 
 import fs from 'fs'
 
 import { env } from "../env.js";
+import { logger } from "../logger.js";
+import ElementNotFoundError from "../error/element-not-found-error.js";
+import { getDay, getRangeAsIndexes } from "../util/time-uils.js";
 
 type HttpMethod = "GET" | "POST";
 
@@ -72,7 +75,7 @@ class DivisistFetcherImpl implements DivisistFetcher {
   private getElement(document: Document, querySelector: string): Element {
     const data = document.querySelector(querySelector);
     if (!data) {
-      throw new Error(`${querySelector} not found for document`);
+      throw new ElementNotFoundError(`${querySelector} not found for document`);
     }
     return data;
   }
@@ -131,14 +134,14 @@ class DivisistFetcherImpl implements DivisistFetcher {
     const requisites: string[] = [];
     let requiredCredits: number = 0;
     reqs.forEach(e => {
-      if(e.includes("Cre:")){
+      if (e.includes("Cre:")) {
         requiredCredits = parseInt(e.split(":")[1])
-      }else{
+      } else {
         requisites.push(e);
       }
     })
 
-    
+
     //Content processing (code, hours, credits, elective)
     const cleanContent = content.split(/\s/).filter(el => el !== "").join(" ");
     let type: "MANDATORY" | "ELECTIVE" = "MANDATORY";
@@ -163,13 +166,96 @@ class DivisistFetcherImpl implements DivisistFetcher {
     return data;
   }
 
-  async getSubjectInfo(ci_session: string): Promise<SubjectData> {
-    const ENDPOINT_NAME = "";
-    const QUERY_SELECTOR = "";
-    const html: string = await this.makeRequest(ENDPOINT_NAME, ci_session, "GET");
+  async getSubjectInfo(ci_session: string, code: string, isPrincipal: boolean): Promise<SubjectData> {
+    const ENDPOINT_NAME = "consulta/materia";
+    const html: string = await this.makeRequest(ENDPOINT_NAME, ci_session, "POST", {
+      consulta: "1",
+      codigo: code
+    });
     const document: Document = this.getJSDOM(html);
-    throw new Error("Method not implemented.");
+    const groupsQuery: string = "#collapse1 > div > div > table > tbody";
+    const sessionsQuery: string = "#collapse2 > div > div > table > tbody";
+    const subjectData: SubjectData = {
+      code: code,
+      equivalences: [],
+      groups: {}
+    }
+    try {
+      const groupsElement: Element = this.getElement(document, groupsQuery);
+      const sessionsElement: Element = this.getElement(document, sessionsQuery);
+      const groups: { [K: string]: GroupData } = {};
+
+      //Add groups
+
+      const groupRows = Array.from(groupsElement.children).slice(1);
+      for (const row of groupRows) {
+        const letter: string = row.children[0].innerHTML.trim();
+        const groupCode: string = `${code}-${letter}`;
+        const max: number = parseInt(row.children[1].innerHTML.trim());
+        const available: number = parseInt(row.children[2].innerHTML.trim());
+        const teacher: string = row.children[3].innerHTML.trim();
+        groups[groupCode] = {
+          availableCapacity: available,
+          maxCapacity: max,
+          name: groupCode,
+          program: groupCode.substring(0, 3),
+          teacher,
+          sessions: []
+        };
+      }
+
+      //Add sessions to these groups
+
+      const sessionRows = Array.from(sessionsElement.children).slice(1);
+      for (const row of sessionRows) {
+        const [letter, dayStr, stringHours, classroom] = [0, 1, 2, 3].map(el => row.children[el].innerHTML.trim());
+        const groupCode = `${code}-${letter}`;
+        const day = getDay(dayStr)
+        const [beginHour, endHour] = getRangeAsIndexes(stringHours);
+        const session: SessionData = {
+          beginHour,
+          endHour,
+          classroom,
+          day
+        }
+        groups[groupCode].sessions.push(session);
+      }
+
+      for (const groupCode in groups) {
+        const group: GroupData = groups[groupCode];
+        if (group.sessions.length === 0) {
+          delete groups[groupCode];
+        }
+      }
+
+      subjectData.groups = groups;
+
+    } catch (error) {
+      if (error instanceof ElementNotFoundError) {
+        logger.warn(`${code} has no groups`)
+      } else {
+        throw error;
+      }
+    } finally {
+      //Add equivalences
+      const equivalences: string[] = [];
+      if (isPrincipal) {
+        const equivalencesQuery: string = "#collapse3 > div > div > table > tbody";
+        const equivalencesElement: Element | null = this.getElement(document, equivalencesQuery);
+
+        const equivRows = Array.from(equivalencesElement.children).slice(1);
+        for (const equivalence of equivRows) {
+          const equivalenceCode = equivalence.children[0].innerHTML;
+          equivalences.push(equivalenceCode)
+        }
+      }
+
+      subjectData.equivalences = equivalences;
+    }
+    
+    return subjectData;
   }
+
 }
 
 export default DivisistFetcherImpl;

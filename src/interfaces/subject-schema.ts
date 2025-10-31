@@ -11,25 +11,31 @@ const SubjectPensumDataSchema = z.object({
   requisites: z.array(z.string()),
 });
 
+const SessionDataSchema = z.object({
+  day: z.number(),
+  beginHour: z.number(),
+  endHour: z.number(),
+  classroom: z.string(),
+})
+
+const GroupDataSchema = z.object({
+  name: z.string(),
+  teacher: z.string(),
+  program: z.string(),
+  maxCapacity: z.number(),
+  availableCapacity: z.number(),
+  sessions: z.array(SessionDataSchema),
+});
+
 const SubjectDataSchema = z.object({
   code: z.string(),
-  groups: z.record(z.string(), z.object({
-    name: z.string(),
-    teacher: z.string(),
-    program: z.string(),
-    maxCapacity: z.string(),
-    availableCapacity: z.string(),
-    sessions: z.array(z.object({
-      day: z.number(),
-      beginHour: z.number(),
-      endHour: z.number(),
-      classroom: z.string(),
-    })),
-  })),
+  groups: z.record(z.string(), GroupDataSchema),
   equivalences: z.array(z.string()),
 });
 
 type SubjectData = z.infer<typeof SubjectDataSchema>;
 type SubjectPensumData = z.infer<typeof SubjectPensumDataSchema>;
+type SessionData = z.infer<typeof SessionDataSchema>;
+type GroupData = z.infer<typeof GroupDataSchema>;
 
-export { SubjectData, SubjectDataSchema, SubjectPensumData, SubjectPensumDataSchema };
+export { SubjectData, SubjectDataSchema, SubjectPensumData, SubjectPensumDataSchema, SessionData, SessionDataSchema, GroupData, GroupDataSchema };

@@ -19,8 +19,9 @@ class FetcherController extends Controller {
         ...pensum
       }
     } else {
+      const subject = await fetcher.getSubject(validatedBody)
       return {
-        message: validatedBody,
+        ...subject
       }
     }
   }

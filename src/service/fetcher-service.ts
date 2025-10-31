@@ -26,7 +26,7 @@ class FetcherService {
   }
 
   async getSubject(request: SubjectRequest): Promise<SubjectData> {
-    const subject: SubjectData = await this.fetcher.getSubjectInfo(request.cookie);
+    const subject: SubjectData = await this.fetcher.getSubjectInfo(request.cookie, request.code, request.isPrincipal);
 
     return subject;
   }
