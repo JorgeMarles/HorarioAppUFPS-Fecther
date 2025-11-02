@@ -19,7 +19,7 @@ const SessionDataSchema = z.object({
 })
 
 const GroupDataSchema = z.object({
-  name: z.string(),
+  code: z.string(),
   teacher: z.string(),
   program: z.string(),
   maxCapacity: z.number(),

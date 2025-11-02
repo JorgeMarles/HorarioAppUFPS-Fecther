@@ -116,6 +116,7 @@ class DivisistFetcherImpl implements DivisistFetcher {
         const subjectData = this.getSubjectFromPensumElement(subject, currentSemester);
         pensumData.subjects[subjectData.code] = subjectData;
       }
+      currentSemester++;
     }
 
     return pensumData;
@@ -198,7 +199,7 @@ class DivisistFetcherImpl implements DivisistFetcher {
         groups[groupCode] = {
           availableCapacity: available,
           maxCapacity: max,
-          name: groupCode,
+          code: groupCode,
           program: groupCode.substring(0, 3),
           teacher,
           sessions: []
