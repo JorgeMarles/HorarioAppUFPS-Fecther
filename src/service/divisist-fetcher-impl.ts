@@ -178,7 +178,8 @@ class DivisistFetcherImpl implements DivisistFetcher {
     const subjectData: SubjectData = {
       code: code,
       equivalences: [],
-      groups: {}
+      groups: {},
+      isPrincipal
     }
     try {
       const groupsElement: Element = this.getElement(document, groupsQuery);
@@ -240,19 +241,25 @@ class DivisistFetcherImpl implements DivisistFetcher {
       //Add equivalences
       const equivalences: string[] = [];
       if (isPrincipal) {
-        const equivalencesQuery: string = "#collapse3 > div > div > table > tbody";
-        const equivalencesElement: Element | null = this.getElement(document, equivalencesQuery);
 
-        const equivRows = Array.from(equivalencesElement.children).slice(1);
-        for (const equivalence of equivRows) {
-          const equivalenceCode = equivalence.children[0].innerHTML;
-          equivalences.push(equivalenceCode)
+        try {
+          const equivalencesQuery: string = "#collapse3 > div > div > table > tbody";
+          const equivalencesElement: Element = this.getElement(document, equivalencesQuery);
+          const equivRows = Array.from(equivalencesElement.children).slice(1);
+          for (const equivalence of equivRows) {
+            const equivalenceCode = equivalence.children[0].innerHTML;
+            equivalences.push(equivalenceCode)
+          }
+        } catch (error) {
+          if (error instanceof ElementNotFoundError) {
+            logger.warn(`${code} has no equivalences`)
+          } else {
+            throw error;
+          }
         }
       }
-
       subjectData.equivalences = equivalences;
     }
-    
     return subjectData;
   }
 

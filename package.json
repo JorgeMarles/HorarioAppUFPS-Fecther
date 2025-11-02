@@ -28,6 +28,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "http-status-codes": "^2.3.0",
     "jsdom": "^26.1.0",
     "morgan": "^1.10.0",
     "pino": "^10.1.0",
@@ -35,9 +36,9 @@
     "pino-pretty": "^13.1.2",
     "reflect-metadata": "^0.2.2",
     "swagger-ui-express": "^5.0.1",
+    "tsoa": "^6.6.0",
     "undici": "^7.16.0",
-    "zod": "^3.25.67",
-    "tsoa": "^6.6.0"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.2",

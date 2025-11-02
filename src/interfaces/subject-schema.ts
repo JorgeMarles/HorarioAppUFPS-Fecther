@@ -28,6 +28,7 @@ const GroupDataSchema = z.object({
 });
 
 const SubjectDataSchema = z.object({
+  isPrincipal: z.boolean(),
   code: z.string(),
   groups: z.record(z.string(), GroupDataSchema),
   equivalences: z.array(z.string()),

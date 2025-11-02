@@ -6,6 +6,8 @@ import { env } from "./env.js";
 import { logger } from "./logger.js";
 import { ZodError } from "zod";
 import { ValidateError } from "tsoa";
+import { sendResponse } from "./service/response-service.js";
+import { FetchingRequest } from "./interfaces/fetching-request.js";
 
 export function notFound(req: Request, res: Response, next: NextFunction) {
   res.status(404);
@@ -17,11 +19,10 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
 // ...existing code...
 export function errorHandler(
   err: unknown, 
-  req: Request, 
+  req: Request<{}, any, FetchingRequest>, 
   res: Response<ErrorResponse>, 
   _next: NextFunction
 ): void {
-  // Log del error
   logger.error({ 
     err, 
     url: req.url, 
@@ -29,6 +30,13 @@ export function errorHandler(
     body: req.body 
   }, "Unhandled error");
 
+  sendResponse({
+    callbackUrl: req.body.callbackUrl,
+    jobId: req.body.jobId,
+    response: `Error in request: ${JSON.stringify(err)}`,
+    success: false,
+  })
+  
   // Zod validation errors
   if (err instanceof ZodError) {
     res.status(400).json({
@@ -49,7 +57,6 @@ export function errorHandler(
     return;
   }
 
-  // Errores personalizados con statusCode
   if (err instanceof Error && 'statusCode' in err) {
     res.status((err as any).statusCode).json({
       message: err.message,
@@ -58,7 +65,6 @@ export function errorHandler(
     return;
   }
 
-  // Error genérico
   if (err instanceof Error) {
     res.status(500).json({
       message: err.message,
@@ -67,7 +73,6 @@ export function errorHandler(
     return;
   }
 
-  // Fallback
   res.status(500).json({
     message: "Internal server error",
     stack: env.NODE_ENV === "production" ? "🥞" : undefined,
