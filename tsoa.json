@@ -9,7 +9,6 @@
   },
   "routes": {
     "routesDir": "src/generated",
-    "routesFileName": "routes.ts",
-    "basePath": "/api/fetcher"
+    "routesFileName": "routes.ts"
   }
 }
