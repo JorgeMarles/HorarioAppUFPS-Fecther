@@ -6,9 +6,9 @@ import { FetchingRequestSchema, FetchingRequest } from "../interfaces/fetching-r
 import FetcherService from "../service/fetcher-service.js";
 import { logger } from "../logger.js";
 
-@Route("/fetch")
+@Route("")
 class FetcherController extends Controller {
-  @Post("")
+  @Post("fetch")
   @SuccessResponse("202", "Fetch process started")
   public async postFetch(@Body() body: FetchingRequest): Promise<{
     message: string;

@@ -3,7 +3,7 @@ import { logger } from "../logger";
 
 export async function sendResponse(response: FetchingResponse) {
     const url = response.callbackUrl;
-    const endpoint = `/workflow/job/${response.jobId}`;
+    const endpoint = `/api/workflow/workflow/job/${response.jobId}`;
     
     logger.info({ ...response.data }, `Sending ${response.success ? "OK" : "Error"} to ${url} (${response.jobId})`);
 
