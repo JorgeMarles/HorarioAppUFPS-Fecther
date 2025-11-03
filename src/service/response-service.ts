@@ -24,6 +24,7 @@ export async function sendResponse(response: FetchingResponse) {
             if(!httpResponse.ok){
                 logger.error(`HTTP Error(${endpoint}) ${httpResponse.status}: ${httpResponse.statusText}`)
             }
+            times++;
         } while (!httpResponse.ok && times <= RETRIES)
 
 
