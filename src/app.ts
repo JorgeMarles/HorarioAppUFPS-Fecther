@@ -26,7 +26,7 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(undefined, {
     swaggerOptions: {
-      url: "/api/fetcher/swagger.json",
+      url: "/swagger.json",
     },
   }),
 );

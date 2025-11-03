@@ -4,8 +4,7 @@
   "controllerPathGlobs": ["src/controller/**/*.ts"],
   "spec": {
     "outputDirectory": "public",
-    "specVersion": 3,
-    "basePath": "/api/fetcher"
+    "specVersion": 3
   },
   "routes": {
     "routesDir": "src/generated",
