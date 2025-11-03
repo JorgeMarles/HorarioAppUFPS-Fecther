@@ -33,7 +33,7 @@ class FetcherService {
     return subject;
   }
 
-  async processRequest(request: FetchingRequest): Promise<void> {
+  async processRequest(request: FetchingRequest): Promise<FetchingResponse> {
     const callbackUrl = request.callbackUrl;
     const jobId = request.jobId;
     let data: PensumData | SubjectData | null = null;
@@ -52,7 +52,8 @@ class FetcherService {
         response: "Operación realizada correctamente",
         success: true
       }
-      await sendResponse(response)
+      return response;
+      //await sendResponse(response)
     } catch (error) {
       let responseMsg = "Unknown error"
       if (error instanceof Error) {
@@ -64,7 +65,8 @@ class FetcherService {
         response: responseMsg,
         success: false
       }
-      await sendResponse(response)
+      return response;
+      //await sendResponse(response)
     }
 
   }

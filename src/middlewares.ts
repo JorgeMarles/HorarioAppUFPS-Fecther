@@ -30,13 +30,6 @@ export function errorHandler(
     body: req.body 
   }, "Unhandled error");
 
-  sendResponse({
-    callbackUrl: req.body.callbackUrl,
-    jobId: req.body.jobId,
-    response: `Error in request: ${JSON.stringify(err)}`,
-    success: false,
-  })
-  
   // Zod validation errors
   if (err instanceof ZodError) {
     res.status(400).json({
