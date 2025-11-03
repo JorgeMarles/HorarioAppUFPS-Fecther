@@ -8,7 +8,7 @@ const FetchingResponseSchema = z.object({
     callbackUrl: z.string().url(),
     success: z.boolean(),
     response: z.string(),
-    data: z.union([PensumDataSchema, SubjectDataSchema]).optional()
+    data: z.discriminatedUnion('type',[PensumDataSchema, SubjectDataSchema]).optional(),
 })
 
 type FetchingResponse = z.infer<typeof FetchingResponseSchema>

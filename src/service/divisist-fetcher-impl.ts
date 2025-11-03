@@ -95,7 +95,9 @@ class DivisistFetcherImpl implements DivisistFetcher {
     const html: string = await this.makeRequest(ENDPOINT_NAME, ci_session, "GET");
     const document: Document = this.getJSDOM(html);
 
-    const pensumData: PensumData = {};
+    const pensumData: PensumData = {
+      type: "PENSUM"
+    };
     const semestersElementQuery = "#content_completw > div.wrapper > div > section.content > div > div.box-body.no-padding > div > table > tbody";
     const semestersElement = this.getElement(document, semestersElementQuery)
 
@@ -177,6 +179,7 @@ class DivisistFetcherImpl implements DivisistFetcher {
     const groupsQuery: string = "#collapse1 > div > div > table > tbody";
     const sessionsQuery: string = "#collapse2 > div > div > table > tbody";
     const subjectData: SubjectData = {
+      type: "SUBJECT",
       code: code,
       equivalences: [],
       groups: {},

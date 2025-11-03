@@ -19,6 +19,7 @@ class FetcherService {
     const otherData: PensumData = await this.fetcher.getPensumInfo(request.cookie);
 
     const response: PensumData = {
+      type: "PENSUM",
       name,
       semesters: otherData.semesters,
       updateTeachers: request.updateTeachers,

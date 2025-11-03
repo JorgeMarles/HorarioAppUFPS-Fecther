@@ -3,6 +3,7 @@ import { z } from "zod";
 import { SubjectPensumDataSchema } from "./subject-schema.js";
 
 const PensumDataSchema = z.object({
+  type: z.literal("PENSUM"),
   name: z.string().optional(),
   semesters: z.number().optional(),
   updateTeachers: z.boolean().optional(),
