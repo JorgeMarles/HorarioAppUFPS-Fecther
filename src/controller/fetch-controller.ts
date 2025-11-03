@@ -14,6 +14,7 @@ class FetcherController extends Controller {
     message: string;
     jobId: number;
   }> {
+    logger.info({body}, "Body received")
     // Validar - si falla, automáticamente va al middleware
     const validatedBody = FetchingRequestSchema.parse(body);
     

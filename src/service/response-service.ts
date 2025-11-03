@@ -11,6 +11,7 @@ export async function sendResponse(response: FetchingResponse) {
 
         let httpResponse: Response;
         const RETRIES = 4;
+        let times = 0;
         do {
             httpResponse = await fetch(url + endpoint, {
                 method: 'POST',
@@ -23,7 +24,7 @@ export async function sendResponse(response: FetchingResponse) {
             if(!httpResponse.ok){
                 logger.error(`HTTP Error(${endpoint}) ${httpResponse.status}: ${httpResponse.statusText}`)
             }
-        } while (!httpResponse.ok)
+        } while (!httpResponse.ok && times <= RETRIES)
 
 
         if (!httpResponse.ok) {
